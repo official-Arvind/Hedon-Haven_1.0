@@ -1,0 +1,5 @@
+sed -i 's/import '"'"'settings_privacy.dart'"'"';/import '"'"'settings_privacy.dart'"'"';\nimport '"'"'settings_data.dart'"'"';\nimport '"'"'package:page_transition\/page_transition.dart'"'"';/g' lib/ui/screens/settings/settings_main.dart
+
+sed -i 's/MaterialPageRoute(/PageTransition(type: PageTransitionType.rightToLeftJoined, childCurrent: widget,/g' lib/ui/screens/settings/settings_main.dart
+
+sed -i '/title: const Text("Privacy"),/i \                  ListTile(\n                    title: const Text("Data & Storage"),\n                    subtitle: const Text("Export\/Import your user data"),\n                    leading: const Icon(Icons.storage),\n                    onTap: () {\n                      Navigator.push(\n                          context,\n                          PageTransition(\n                              type: PageTransitionType.rightToLeftJoined,\n                              childCurrent: widget,\n                              settings: RouteSettings(name: "/settings_data"),\n                              child: const DataScreen()));\n                    },\n                  ),' lib/ui/screens/settings/settings_main.dart

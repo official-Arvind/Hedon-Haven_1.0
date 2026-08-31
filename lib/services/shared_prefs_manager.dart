@@ -89,6 +89,7 @@ Future<void> _setPluginProviderSettings() async {
 }
 
 Future<void> _setAppearanceSettings() async {
+  await sharedStorage.setString("general_sexual_orientation", "All");
   // Whether the app is concealed ("reminders" or "fake_settings") or default appearance ("Hedon Haven")
   await sharedStorage.setString(
       "appearance_launcher_appearance", "Hedon Haven");
@@ -115,6 +116,7 @@ Future<void> _setMediaSettings() async {
   await sharedStorage.setBool("media_show_progress_thumbnails", true);
   await sharedStorage.setInt("media_preferred_video_quality", 2160); // 4K
   await sharedStorage.setInt("media_seek_duration", 10);
+  await sharedStorage.setBool("media_volume_warning", true);
 }
 
 Future<void> _setCommentsSettings() async {

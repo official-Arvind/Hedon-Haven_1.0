@@ -9,6 +9,8 @@ import 'settings_history.dart';
 import 'settings_media.dart';
 import 'settings_plugins/settings_plugins.dart';
 import 'settings_privacy.dart';
+import 'settings_data.dart';
+import 'package:page_transition/page_transition.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -55,10 +57,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     onTap: () {
                       Navigator.push(
                           context,
-                          MaterialPageRoute(
+                          PageTransition(type: PageTransitionType.rightToLeftJoined, childCurrent: widget,
                               settings:
                                   RouteSettings(name: "/settings_plugins_list"),
-                              builder: (context) => const PluginsScreen()));
+                              child: const PluginsScreen()));
                     },
                   ),
                   ListTile(
@@ -69,10 +71,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     onTap: () {
                       Navigator.push(
                           context,
-                          MaterialPageRoute(
+                          PageTransition(type: PageTransitionType.rightToLeftJoined, childCurrent: widget,
                               settings:
                                   RouteSettings(name: "/settings_appearance"),
-                              builder: (context) => const AppearanceScreen()));
+                              child: const AppearanceScreen()));
                     },
                   ),
                   ListTile(
@@ -83,9 +85,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     onTap: () {
                       Navigator.push(
                           context,
-                          MaterialPageRoute(
+                          PageTransition(type: PageTransitionType.rightToLeftJoined, childCurrent: widget,
                               settings: RouteSettings(name: "/settings_media"),
-                              builder: (context) => const MediaScreen()));
+                              child: const MediaScreen()));
                     },
                   ),
                   ListTile(
@@ -95,10 +97,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     onTap: () {
                       Navigator.push(
                           context,
-                          MaterialPageRoute(
+                          PageTransition(type: PageTransitionType.rightToLeftJoined, childCurrent: widget,
                               settings:
                                   RouteSettings(name: "/settings_comments"),
-                              builder: (context) => const CommentsScreen()));
+                              child: const CommentsScreen()));
                     },
                   ),
                   ListTile(
@@ -108,13 +110,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     onTap: () {
                       Navigator.push(
                           context,
-                          MaterialPageRoute(
+                          PageTransition(type: PageTransitionType.rightToLeftJoined, childCurrent: widget,
                               settings:
                                   RouteSettings(name: "/settings_history"),
-                              builder: (context) => const HistoryScreen()));
+                              child: const HistoryScreen()));
                     },
                   ),
                   ListTile(
+                  ListTile(
+                    title: const Text("Data & Storage"),
+                    subtitle: const Text("Export/Import your user data"),
+                    leading: const Icon(Icons.storage),
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          PageTransition(
+                              type: PageTransitionType.rightToLeftJoined,
+                              childCurrent: widget,
+                              settings: RouteSettings(name: "/settings_data"),
+                              child: const DataScreen()));
+                    },
+                  ),
                     title: const Text("Privacy"),
                     subtitle:
                         const Text("Hide app preview, Keyboard incognito mode"),
@@ -122,10 +138,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     onTap: () {
                       Navigator.push(
                           context,
-                          MaterialPageRoute(
+                          PageTransition(type: PageTransitionType.rightToLeftJoined, childCurrent: widget,
                               settings:
                                   RouteSettings(name: "/settings_privacy"),
-                              builder: (context) => const PrivacyScreen()));
+                              child: const PrivacyScreen()));
                     },
                   ),
                   ListTile(
@@ -136,9 +152,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       // The AboutScreen has an option to turn on dev settings -> setState on return to immediately show/hide dev settings
                       Navigator.push(
                           context,
-                          MaterialPageRoute(
+                          PageTransition(type: PageTransitionType.rightToLeftJoined, childCurrent: widget,
                               settings: RouteSettings(name: "/settings_about"),
-                              builder: (context) => AboutScreen())).then(
+                              child: AboutScreen())).then(
                           (value) => setState(() {}));
                     },
                   ),
@@ -159,10 +175,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 onTap: () {
                                   Navigator.push(
                                       context,
-                                      MaterialPageRoute(
+                                      PageTransition(type: PageTransitionType.rightToLeftJoined, childCurrent: widget,
                                           settings: RouteSettings(
                                               name: "/settings_developer"),
-                                          builder: (context) =>
+                                          child:
                                               const DeveloperScreen()));
                                 },
                               )

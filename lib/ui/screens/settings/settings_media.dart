@@ -1,5 +1,4 @@
 import 'package:material_ui/material_ui.dart';
-
 import '/ui/widgets/options_dialog.dart';
 import '/ui/widgets/options_switch.dart';
 import '/utils/global_vars.dart';
@@ -83,6 +82,16 @@ class _MediaScreenState extends State<MediaScreen> {
                                         value.substring(0, value.length - 8)));
                                 setState(() {});
                               });
+                        }),
+                    FutureBuilder<bool?>(
+                        future: sharedStorage.getBool("media_volume_warning"),
+                        builder: (context, snapshot) {
+                          return OptionsSwitch(
+                              title: "Volume warning",
+                              subTitle: "Warn if media is opened while device volume is high",
+                              switchState: snapshot.data ?? true,
+                              onToggled: (value) async => await sharedStorage
+                                  .setBool("media_volume_warning", value));
                         }),
                     FutureBuilder<bool?>(
                         future:

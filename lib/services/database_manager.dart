@@ -94,6 +94,17 @@ Future<void> purgeDatabase() async {
   }
 }
 
+Future<void> importTableData(String tableName, List<dynamic> data) async {
+  for (var row in data) {
+    if (row is Map<String, dynamic>) {
+      try {
+        await _database.insert(tableName, row, conflictAlgorithm: ConflictAlgorithm.replace);
+      } catch (e) {
+        logger.e("Failed to insert row into $tableName: $e");
+      }
+    }
+  }
+}
 Future<void> createDefaultTables() async {
   logger.i("Creating default tables in database");
   // Reimplementation of some parts of UniversalSearchResult

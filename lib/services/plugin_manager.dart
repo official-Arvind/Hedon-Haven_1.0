@@ -159,7 +159,12 @@ class PluginManager {
           try {
             await _enablePlugin(plugin);
             await _setAsProvider(plugin, providers);
-          } catch (_) {
+          } catch (e, st) {
+            logger.e("Automatically disabling faulty plugin ${plugin.codeName} due to $e\n$st");
+            _failedPlugins.remove(plugin);
+            for (var set in _providers.values) {
+              set.remove(plugin);
+            }
             // Ignore errors, already handled in the other functions
           }
         }),

@@ -1,3 +1,4 @@
+import 'package:perfect_volume_control/perfect_volume_control.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -79,6 +80,18 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
 
   @override
   void initState() {
+    sharedStorage.getBool("media_volume_warning").then((warn) async {
+      if (warn == true) {
+        try {
+          double vol = await PerfectVolumeControl.getVolume();
+          if (vol > 0.7 && mounted) {
+            showToast("Warning: Media volume is high", context);
+          }
+        } catch (e) {
+          logger.w("Could not get device volume: $e");
+        }
+      }
+    });
     super.initState();
     commentsScrollController.addListener((commentsScrollListener));
     _loadMetadata();

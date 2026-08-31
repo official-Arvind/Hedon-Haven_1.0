@@ -1,3 +1,5 @@
+
+import 'package:url_launcher/url_launcher.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '/services/banner_manager.dart';
@@ -36,6 +38,21 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void initState() {
+    if (dart_math.Random().nextDouble() < 0.1) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text("Support Hedon Haven"),
+            content: const Text("If you enjoy using Hedon Haven, please consider donating to support its development!"),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(context), child: const Text("Later")),
+              TextButton(onPressed: () { launchUrl(Uri.parse("https://donations.hedon-haven.top")); Navigator.pop(context); }, child: const Text("Donate")),
+            ],
+          )
+        );
+      });
+    }
     super.initState();
 
     banner = getBanner(context);
@@ -129,10 +146,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 onPressed: () => createResultsBugReport())
           ],
           Spacer(),
-          IconButton(
-            icon: Icon(
-                color: Theme.of(context).colorScheme.primary, Icons.search),
-            onPressed: () => Navigator.push(
+          Tooltip(
+            message: "Search for videos",
+            child: IconButton(
+              icon: Icon(
+                  color: Theme.of(context).colorScheme.primary, Icons.search),
+              onPressed: () => Navigator.push(
               context,
               PageRouteBuilder(
                 settings: RouteSettings(name: "/search_screen"),
@@ -176,17 +195,17 @@ class _HomeScreenState extends State<HomeScreen> {
                                 alignment: Alignment.topCenter,
                                 maxHeight: screenHeight,
                                 child: child,
-                              ),
-                            ),
-                          ),
-                        ),
+                   
+                 
+               
+             
                       ],
-                    ),
+         
                   );
                 },
                 transitionDuration: const Duration(milliseconds: 300),
-              ),
-            ),
+   
+ 
           ),
         ],
       ),
@@ -254,7 +273,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: snapshot.data!.severity == "important"
                         ? Theme.of(context).colorScheme.errorContainer
                         : Theme.of(context).colorScheme.surfaceVariant,
-                  ),
+       
                   child: Padding(
                       padding: const EdgeInsets.all(5),
                       child: Column(
@@ -270,8 +289,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ?.copyWith(
                                     color:
                                         Theme.of(context).colorScheme.onSurface,
-                                  ),
-                            ),
+                       
+                 
                             Text(
                               snapshot.data!.message,
                               style: Theme.of(context)
@@ -281,8 +300,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                     color: Theme.of(context)
                                         .colorScheme
                                         .onSurfaceVariant,
-                                  ),
-                            ),
+                       
+                 
                           ]))));
         });
   }

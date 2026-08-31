@@ -39,9 +39,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     ListTile(
                         trailing: const Icon(Icons.clear),
                         title: const Text("Clear watch history"),
-                        onTap: () {
-                          deleteAllFrom("watch_history");
-                          showToast("Watch history cleared", context);
+                        onTap: () async {
+                          List<Map<String, Object?>> backup = await getAllFrom("watch_history");
+                          await deleteAllFrom("watch_history");
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Watch history cleared"), action: SnackBarAction(label: "UNDO", onPressed: () => importTableData("watch_history", backup))));
+                          // showToast("Watch history cleared", context);
                         }),
                     FutureBuilder<bool?>(
                         future: sharedStorage.getBool("history_search"),
@@ -56,16 +58,20 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     ListTile(
                         trailing: const Icon(Icons.clear),
                         title: const Text("Clear search history"),
-                        onTap: () {
-                          deleteAllFrom("search_history");
-                          showToast("Search history cleared", context);
+                        onTap: () async {
+                          List<Map<String, Object?>> backup = await getAllFrom("search_history");
+                          await deleteAllFrom("search_history");
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Search history cleared"), action: SnackBarAction(label: "UNDO", onPressed: () => importTableData("search_history", backup))));
+                          // showToast("Search history cleared", context);
                         }),
                     ListTile(
                         trailing: const Icon(Icons.clear),
                         title: const Text("Delete all favorites"),
-                        onTap: () {
-                          deleteAllFrom("favorites");
-                          showToast("All favorites deleted", context);
+                        onTap: () async {
+                          List<Map<String, Object?>> backup = await getAllFrom("favorites");
+                          await deleteAllFrom("favorites");
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("All favorites deleted"), action: SnackBarAction(label: "UNDO", onPressed: () => importTableData("favorites", backup))));
+                          // showToast("All favorites deleted", context);
                         }),
                   ],
                 ))));

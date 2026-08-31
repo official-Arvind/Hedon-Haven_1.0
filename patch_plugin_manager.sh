@@ -1,0 +1,1 @@
+sed -i 's/} catch (\_) {/} catch (e, st) {\n            logger.e("Automatically disabling faulty plugin ${plugin.codeName} due to $e\\n$st");\n            _failedPlugins.remove(plugin);\n            for (var set in _providers.values) {\n              set.remove(plugin);\n            }/g' lib/services/plugin_manager.dart

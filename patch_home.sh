@@ -1,0 +1,4 @@
+sed -i '/void initState() {/a \
+    if (dart_math.Random().nextDouble() < 0.1) {\n      WidgetsBinding.instance.addPostFrameCallback((_) {\n        showDialog(\n          context: context,\n          builder: (context) => AlertDialog(\n            title: const Text("Support Hedon Haven"),\n            content: const Text("If you enjoy using Hedon Haven, please consider donating to support its development!"),\n            actions: [\n              TextButton(onPressed: () => Navigator.pop(context), child: const Text("Later")),\n              TextButton(onPressed: () { launchUrl(Uri.parse("https://donations.hedon-haven.top")); Navigator.pop(context); }, child: const Text("Donate")),\n            ],\n          )\n        );\n      });\n    }' lib/ui/screens/home.dart
+
+sed -i '/import '"'"'dart:math'"'"';/! s/import '"'"'dart:async'"'"';/import '"'"'dart:async'"'"';\nimport '"'"'dart:math'"'"' as dart_math;/g' lib/ui/screens/home.dart

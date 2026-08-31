@@ -1,0 +1,4 @@
+sed -i '/await sharedStorage.setInt("media_seek_duration", 10);/a \  await sharedStorage.setBool("media_volume_warning", true);' lib/services/shared_prefs_manager.dart
+
+sed -i '/FutureBuilder<bool?>(\n*future: sharedStorage.getBool("media_auto_play"),/i \
+                    FutureBuilder<bool?>(\n                        future: sharedStorage.getBool("media_volume_warning"),\n                        builder: (context, snapshot) {\n                          return OptionsSwitch(\n                              title: "Volume warning",\n                              subTitle: "Show a warning if media is opened while device volume is high",\n                              switchState: snapshot.data ?? true,\n                              onToggled: (value) async => await sharedStorage\n                                  .setBool("media_volume_warning", value));\n                        }),' lib/ui/screens/settings/settings_media.dart
