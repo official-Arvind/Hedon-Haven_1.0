@@ -1,6 +1,6 @@
 name: Build Android Release
 on:
-  workflow_dispatch: # Allows manual trigger
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -23,7 +23,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'oracle'
-          java-version: '21'
+          java-version: '17' # Downgraded to 17 for better plugin compatibility
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -35,11 +35,21 @@ jobs:
           dart --disable-analytics
           flutter config --disable-analytics
 
+      - name: Get Dependencies and Patch Broken Packages
+        run: |
+          echo "Fetching dependencies..."
+          flutter clean
+          flutter pub get
+          
+          echo "Patching jcenter() out of older plugins..."
+          find $HOME/.pub-cache/hosted/pub.dev/ -name "build.gradle" -type f -exec sed -i 's/jcenter()/mavenCentral()/g' {} + || true
+          
+          echo "Upgrading ancient Kotlin versions in older plugins to 1.9.0..."
+          find $HOME/.pub-cache/hosted/pub.dev/ -name "build.gradle" -type f -exec sed -i "s/ext.kotlin_version = '[^']*'/ext.kotlin_version = '1.9.0'/g" {} + || true
+          find $HOME/.pub-cache/hosted/pub.dev/ -name "build.gradle" -type f -exec sed -i 's/ext.kotlin_version = "[^"]*"/ext.kotlin_version = "1.9.0"/g' {} + || true
+
       - name: Building android releases (Unsigned/Default)
         run: |
-          echo "Preparing flutter"
-          flutter clean && flutter pub get
-          
           echo "Building split apks"
           flutter build apk --split-per-abi
           
@@ -92,7 +102,6 @@ jobs:
       - name: Generating commit body
         id: commit-body
         run: |
-          # Force refresh git tags (Added || true to prevent failure on first-time runs)
           git tag -d $(git tag -l) || true
           git fetch --tags
           
@@ -100,16 +109,11 @@ jobs:
           NEW_TAG="${{ steps.tag.outputs.tag }}"
           FULL_URL="https://github.com/${{ github.repository }}/compare/${PREV_TAG}...${NEW_TAG}"
           
-          # Fallback check if this is the very first tag
           if [ -z "$PREV_TAG" ]; then
             COMMITS=$(git log --pretty=format:"- %s (%h)" --no-merges)
           else
             COMMITS=$(git log ${PREV_TAG}..HEAD --pretty=format:"- %s (%h)" --no-merges)
           fi
-          
-          echo "All commits:"
-          echo "$COMMITS"
-          echo ""
           
           echo "body<<EOF" >> $GITHUB_OUTPUT
           printf '%s\n' "${COMMITS}" >> $GITHUB_OUTPUT
