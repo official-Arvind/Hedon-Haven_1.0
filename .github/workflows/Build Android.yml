@@ -23,7 +23,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'oracle'
-          java-version: '17' # Downgraded to 17 for better plugin compatibility
+          java-version: '17' # Keep this at 17!
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -47,6 +47,23 @@ jobs:
           echo "Upgrading ancient Kotlin versions in older plugins to 1.9.0..."
           find $HOME/.pub-cache/hosted/pub.dev/ -name "build.gradle" -type f -exec sed -i "s/ext.kotlin_version = '[^']*'/ext.kotlin_version = '1.9.0'/g" {} + || true
           find $HOME/.pub-cache/hosted/pub.dev/ -name "build.gradle" -type f -exec sed -i 's/ext.kotlin_version = "[^"]*"/ext.kotlin_version = "1.9.0"/g' {} + || true
+
+          echo "Injecting missing namespaces into outdated plugins..."
+          for build_gradle in $(find $HOME/.pub-cache/hosted/pub.dev/ -name "build.gradle" -type f); do
+            dir=$(dirname "$build_gradle")
+            if ! grep -q "namespace" "$build_gradle"; then
+              # Find the AndroidManifest.xml for this specific plugin
+              manifest=$(find "$dir" -maxdepth 3 -name "AndroidManifest.xml" | head -n 1)
+              if [ -n "$manifest" ]; then
+                # Extract the package string using regex
+                package_name=$(grep -oP 'package="\K[^"]+' "$manifest" | head -n 1 || true)
+                if [ -n "$package_name" ]; then
+                  echo "Injecting namespace '$package_name' into $build_gradle"
+                  sed -i -e "/android[[:space:]]*{/a \    namespace '${package_name}'" "$build_gradle"
+                fi
+              fi
+            fi
+          done || true
 
       - name: Building android releases (Unsigned/Default)
         run: |
