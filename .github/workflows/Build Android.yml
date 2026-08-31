@@ -1,6 +1,10 @@
 name: Build Android Release
 on:
-  workflow_dispatch:
+  workflow_dispatch: # Allows manual trigger
+  push:
+    branches:
+      - main
+      - master
 
 jobs:
   build-android:
