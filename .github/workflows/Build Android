@@ -1,0 +1,125 @@
+name: Build Android Release
+on:
+  workflow_dispatch:
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Preparing environment
+        run: |
+          mkdir -p ./release
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'oracle'
+          java-version: '21'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+
+      - name: Disable flutter/dart analytics
+        run: |
+          dart --disable-analytics
+          flutter config --disable-analytics
+
+      - name: Building android releases (Unsigned/Default)
+        run: |
+          echo "Preparing flutter"
+          flutter clean && flutter pub get
+          
+          echo "Building split apks"
+          flutter build apk --split-per-abi
+          
+          echo "Building combined apk"
+          flutter build apk
+          
+          echo "Copying apks to release dir"
+          mv ./build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk ./release/android-arm32.apk
+          mv ./build/app/outputs/flutter-apk/app-arm64-v8a-release.apk ./release/android-arm64.apk
+          mv ./build/app/outputs/flutter-apk/app-x86_64-release.apk ./release/android-x86_64.apk
+          mv ./build/app/outputs/flutter-apk/app-release.apk ./release/android-all.apk
+
+      - name: Uploading android artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-artifacts
+          path: ./release/*.apk
+
+  create-release:
+    runs-on: ubuntu-latest
+    needs: [ build-android ] 
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download android artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: android-artifacts
+          path: ./release
+
+      - name: Generating checksums.json
+        run: |
+          json="{}"
+          for file in ./release/*; do
+            checksum=$(sha256sum "$file" | awk '{ print $1 }')
+            filename=$(basename "$file")
+            json=$(echo "$json" | jq --arg file "$filename" --arg checksum "$checksum" '. + {($file): $checksum}')
+          done
+          echo "$json" > ./release/checksums.json
+
+      - name: Generating release tag
+        id: tag
+        run: |
+          tag=v$(grep -oP '(?<=version: )[^+]*' ./pubspec.yaml)
+          echo "tag=$tag" >> $GITHUB_OUTPUT
+
+      - name: Generating commit body
+        id: commit-body
+        run: |
+          # Force refresh git tags (Added || true to prevent failure on first-time runs)
+          git tag -d $(git tag -l) || true
+          git fetch --tags
+          
+          PREV_TAG=$(git tag --sort=-creatordate | head -1)
+          NEW_TAG="${{ steps.tag.outputs.tag }}"
+          FULL_URL="https://github.com/${{ github.repository }}/compare/${PREV_TAG}...${NEW_TAG}"
+          
+          # Fallback check if this is the very first tag
+          if [ -z "$PREV_TAG" ]; then
+            COMMITS=$(git log --pretty=format:"- %s (%h)" --no-merges)
+          else
+            COMMITS=$(git log ${PREV_TAG}..HEAD --pretty=format:"- %s (%h)" --no-merges)
+          fi
+          
+          echo "All commits:"
+          echo "$COMMITS"
+          echo ""
+          
+          echo "body<<EOF" >> $GITHUB_OUTPUT
+          printf '%s\n' "${COMMITS}" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "**Full Changelog**: ${FULL_URL}" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Publishing new release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: APK BUILD - ${{ steps.tag.outputs.tag }}
+          body: ${{ steps.commit-body.outputs.body }}
+          tag_name: ${{ steps.tag.outputs.tag }}
+          make_latest: false
+          prerelease: true
+          files: |
+            ./release/*
